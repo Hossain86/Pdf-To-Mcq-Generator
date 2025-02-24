@@ -1,0 +1,14 @@
+# Ignore environment files
+.env
+backend/.env
+frontend/.env
+
+# Ignore dependency folders
+backend/__pycache__/
+backend/venv/
+frontend/node_modules/
+
+# Ignore logs and build artifacts
+*.log
+backend/*.pyc
+frontend/build/
