@@ -1,0 +1,69 @@
+1: Which programming language is primarily used for AI and backend processing in this system?
+   a) Java
+   b) C++
+   c) Python
+   d) JavaScript
+✅ Answer: c) Python
+
+2: What is NOT a recommended tool for PDF extraction?
+   a) PyPDF2
+   b) pdfminer.six
+   c) Beautiful Soup
+   d) None of the above, all are recommended
+✅ Answer: c) Beautiful Soup
+
+3: Which NLP models are suggested for question generation?
+   a) TensorFlow and Keras
+   b) OpenAI's GPT model and Hugging Face's transformers
+   c) Scikit-learn and Pandas
+   d) NumPy and Matplotlib
+✅ Answer: b) OpenAI's GPT model and Hugging Face's transformers
+
+4: Which databases are recommended for storing the generated questions?
+   a) Microsoft Access and Excel
+   b) MySQL and MongoDB
+   c) Oracle and PostgreSQL
+   d) SQLite and CSV
+✅ Answer: b) MySQL and MongoDB
+
+5: What frontend framework is suggested for building the user interface?
+   a) Angular
+   b) Vue.js
+   c) React.js
+   d) Svelte
+✅ Answer: c) React.js
+
+6: What is the first step in the architecture overview?
+   a) Question Generation Module
+   b) PDF Upload & Extraction Module
+   c) Database Integration Module
+   d) User Interface (UI) development
+✅ Answer: b) PDF Upload & Extraction Module
+
+7: What is a key step in cleaning the extracted text?
+   a) Translating to another language
+   b) Removing special characters and extra spaces
+   c) Converting images to text
+   d) Adding page numbers
+✅ Answer: b) Removing special characters and extra spaces
+
+8: What is the purpose of splitting the text into smaller chunks during question generation?
+   a) To reduce the amount of text processed
+   b) To provide context for each question
+   c) To increase the speed of question generation
+   d) To simplify the NLP model
+✅ Answer: b) To provide context for each question
+
+9: What is NOT a recommended platform for deploying the frontend?
+   a) Netlify
+   b) Vercel
+   c) Heroku
+   d) Docker
+✅ Answer: d) Docker
+
+10: Which of the following is mentioned as a further enhancement for the system?
+    a) Implementing voice recognition
+    b) Auto-categorization and difficulty classification
+    c) Developing a mobile app
+    d) Adding support for video PDFs
+✅ Answer: b) Auto-categorization and difficulty classification
