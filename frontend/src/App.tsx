@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
 
-// Define types for MCQ and options
+// Define types for MCQ and Narrative Questions
 type Option = {
   label: string;
   text: string;
@@ -11,16 +12,21 @@ type Option = {
 type MCQ = {
   question: string;
   options: Option[];
-  answer: string; // Correct answer
+  answer: string;
 };
 
-const MCQGenerator = () => {
+type Narrative = {
+  question: string;
+  answer: string;
+};
+
+const QuestionGenerator = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [mcqs, setMcqs] = useState<MCQ[]>([]); // Array to hold MCQs
+  const [questionType, setQuestionType] = useState<"mcq" | "narrative">("mcq"); // Toggle between MCQ & Narrative
+  const [mcqs, setMcqs] = useState<MCQ[]>([]);
+  const [narrativeQuestions, setNarrativeQuestions] = useState<Narrative[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userAnswers, setUserAnswers] = useState<string[]>([]); // Array to hold user's answers
-  const [quizFinished, setQuizFinished] = useState(false); // Track if quiz is finished
 
   // Handle file selection
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,8 +36,8 @@ const MCQGenerator = () => {
     }
   };
 
-  // Handle MCQ generation
-  const generateMCQs = async () => {
+  // Handle Question Generation
+  const generateQuestions = async () => {
     if (!selectedFile) {
       setError("Please select a PDF file.");
       return;
@@ -39,16 +45,16 @@ const MCQGenerator = () => {
 
     setLoading(true);
     setMcqs([]);
+    setNarrativeQuestions([]);
     setError(null);
-    setQuizFinished(false);
-    setUserAnswers([]);
 
     try {
       const formData = new FormData();
       formData.append("pdf", selectedFile);
+      formData.append("question_type", questionType); // Send question type to backend
 
       const response = await axios.post(
-        "http://127.0.0.1:5000/generate-mcqs",
+        "http://127.0.0.1:5000/generate-questions",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -57,36 +63,24 @@ const MCQGenerator = () => {
 
       if (response.data.error) {
         setError(response.data.error);
-        setMcqs([]); // Reset to empty array on error
       } else {
-        setMcqs(response.data); // Assuming mcqs are returned as an array of MCQ objects
+        if (questionType === "mcq") {
+          setMcqs(response.data);
+        } else {
+          setNarrativeQuestions(response.data);
+        }
       }
     } catch (error) {
-      console.error("Error generating MCQs", error);
-      setError("Failed to generate MCQs.");
+      console.error("Error generating questions", error);
+      setError("Failed to generate questions.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle user answer selection
-  const handleAnswerSelection = (
-    questionIndex: number,
-    selectedOption: string
-  ) => {
-    const updatedAnswers = [...userAnswers];
-    updatedAnswers[questionIndex] = selectedOption;
-    setUserAnswers(updatedAnswers);
-  };
-
-  // Check if the quiz is finished
-  const checkAnswers = () => {
-    setQuizFinished(true);
-  };
-
   return (
-    <div className="container mt-4">
-      <h1 className="text-center mb-4">PDF to MCQ Generator</h1>
+    <div className="container mt-4 mb-4 p-4 border shadow-sm">
+      <h1 className="text-center mb-4">PDF to Question & Answer Generator</h1>
 
       <div className="mb-3">
         <input
@@ -97,65 +91,87 @@ const MCQGenerator = () => {
         />
       </div>
 
+      {/* Select Question Type */}
+      <div className="mb-3">
+        <label className="form-label">Select Question Type:</label>
+        <div className="btn-group w-100">
+          <button
+            className={`btn ${
+              questionType === "mcq" ? "btn-primary" : "btn-outline-primary"
+            }`}
+            onClick={() => setQuestionType("mcq")}
+          >
+            MCQs
+          </button>
+          <button
+            className={`btn ${
+              questionType === "narrative"
+                ? "btn-primary"
+                : "btn-outline-primary"
+            }`}
+            onClick={() => setQuestionType("narrative")}
+          >
+            Narrative Questions
+          </button>
+        </div>
+      </div>
+
       <button
-        onClick={generateMCQs}
+        onClick={generateQuestions}
         disabled={loading}
-        className="btn btn-primary"
+        className="btn btn-success w-100 mb-2"
       >
-        {loading ? "Generating..." : "Generate MCQs"}
+        {loading ? "Generating..." : "Generate Questions"}
       </button>
 
       {error && <div className="alert alert-danger mt-3">{error}</div>}
 
-      {mcqs.length > 0 && (
+      {/* Render MCQs */}
+      {mcqs.length > 0 && questionType === "mcq" && (
         <div className="mt-4">
-          <h2>Generated Questions:</h2>
+          <h2>Generated MCQs:</h2>
           {mcqs.map((mcq, index) => (
-            <div key={index} className="mb-4">
+            <div
+              key={index}
+              className="mb-4 p-3 border rounded shadow-sm bg-light"
+            >
               <div className="mb-2">
                 <strong>
                   {index + 1}. {mcq.question}
                 </strong>
               </div>
-              {mcq.options.map((option, optionIndex) => {
-                const isSelected =
-                  userAnswers[index] === option.label; // Check if this option is selected
-                const isCorrect = mcq.answer === option.label; // Check if it's the correct answer
-                const isIncorrect = isSelected && !isCorrect; // If selected but incorrect
-
-                return (
-                  <button
-                    key={optionIndex}
-                    onClick={() => handleAnswerSelection(index, option.label)}
-                    className={`btn w-100 mb-2 ${quizFinished ? 
-                      isCorrect ? "btn-success" : 
-                      isIncorrect ? "btn-danger" : 
-                      "" : 
-                      isSelected ? "btn-info" : "btn-outline-secondary"}`}
-                  >
-                    {option.label}. {option.text}
-                  </button>
-                );
-              })}
+              {mcq.options.map((option, optionIndex) => (
+                <button
+                  key={optionIndex}
+                  className="btn btn-outline-secondary w-100 mb-2"
+                >
+                  {option.label}. {option.text}
+                </button>
+              ))}
             </div>
           ))}
-          {!quizFinished && (
-            <button
-              onClick={checkAnswers}
-              className="btn btn-success mt-3 w-100"
+        </div>
+      )}
+
+      {/* 🔥 Fix: Render Narrative Questions Correctly */}
+      {narrativeQuestions.length > 0 && questionType === "narrative" && (
+        <div className="mt-4">
+          <h2>Generated Narrative Questions:</h2>
+          {narrativeQuestions.map((narrative, index) => (
+            <div
+              key={index}
+              className="mb-4 p-3 bg-light  border rounded shadow-sm narrative-question"
             >
-              Submit Answers
-            </button>
-          )}
-          {quizFinished && (
-            <div className="mt-4 text-center">
-              <p className="h4">Quiz Finished! Review your answers.</p>
+              <p className="fs-5">
+                <strong>Q: {narrative.question}</strong>
+              </p>
+              <p className="fst-normal fs-6">A: {narrative.answer}</p>
             </div>
-          )}
+          ))}
         </div>
       )}
     </div>
   );
 };
 
-export default MCQGenerator;
+export default QuestionGenerator;
